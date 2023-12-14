@@ -23,7 +23,7 @@ const setOrder = asyncHandler(async (req, res) => {
     const order = await Order.create({
         product: req.body.product,
         user: req.user.id,
-        amount: req.user.amount
+        amount: req.body.amount
     })
     res.status(201).json(order)
 })
@@ -40,7 +40,7 @@ const updateOrder = asyncHandler(async (req, res) => {
         throw new Error("Acces deniend")
     } else {
         const orderUpdated = await Order.findByIdAndUpdate(req.params.id, { amount: req.body.amount }, { new: true })
-        res.status(200).json(tareaUpdated)
+        res.status(200).json(orderUpdated)
     }
 })
 

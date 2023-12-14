@@ -6,56 +6,59 @@ const getProducts = asyncHandler(async (req, res) => {
         const orders = await Product.find()
         res.status(200).json(orders)
     } else {
-        const orders = await Product.find({ user: req.user.id, enable: true })
+        //const orders = await Product.find({ user: req.user.id, enable: true })
+        const orders = await Product.find({ enable: true })
         res.status(200).json(orders)
     }
 })
 
 const setProduct = asyncHandler(async (req, res) => {
+    if (req.user.isAdmin !== true) {
+        res.status(401)
+        throw new Error("Acces deniend")
+    }
     if (!req.body.name) {
         res.status(400)
-        throw new Error("You shoul be put a name")
+        throw new Error("You shoul be have a name")
     } else if (!req.body.description) {
         res.status(400)
-        throw new Error("You shoul be put a description")
+        throw new Error("You shoul be have a description")
     } else if (!req.body.stock) {
         res.status(400)
-        throw new Error("You shoul be put a description")
+        throw new Error("You shoul be have a description")
     } else if (!req.body.price) {
         res.status(400)
-        throw new Error("You shoul be put a price by unit")
+        throw new Error("You shoul be have a price by unit")
     }
+    const product = req.body.icon ? await Product.create({
+        name: req.body.name,
+        user: req.user.id,
+        icon: req.body.icon,
+        description: req.body.description,
+        stock: req.body.stock,
+        price: req.body.price,
+    }) : await Product.create({
+        name: req.body.name,
+        user: req.user.id,
+        description: req.body.description,
+        stock: req.body.stock,
+        price: req.body.price
+    })
 
-    if (!req.body.icon) {
-        const product = await Product.create({
-            name: req.body.name,
-            user: req.user.id,
-            description: req.user.description,
-            stock: req.user.stock,
-            price: req.user.price
-        })
-        res.status(201).json(product)
-    } else {
-        const product = await Product.create({
-            name: req.body.name,
-            user: req.user.id,
-            icon: req.user.icon,
-            description: req.user.description,
-            stock: req.user.stock,
-            price: req.user.price,
-        })
-        res.status(201).json(product)
-    }
+    res.status(201).json(product)
 })
 
 const updateProduct = asyncHandler(async (req, res) => {
+    if (req.user.isAdmin !== true) {
+        res.status(401)
+        throw new Error("Acces deniend")
+    }
     const product = await Product.findById(req.params.id)
     if (!product) {
         res.status(400)
-        throw new Error("The order not found")
+        throw new Error("Product not found")
     }
-
-    if (product.user.toString() !== req.user.id && req.user.isAdmin !== true) {
+    if (product.user.toString() !== req.user.id) {
         res.status(401)
         throw new Error("Acces deniend")
     } else {
@@ -65,10 +68,14 @@ const updateProduct = asyncHandler(async (req, res) => {
 })
 
 const deleteSoftProduct = asyncHandler(async (req, res) => {
+    if (req.user.isAdmin !== true) {
+        res.status(401)
+        throw new Error("Acces deniend")
+    }
     const product = await Product.findById(req.params.id)
     if (!product) {
         res.status(400)
-        throw new Error("The order not found")
+        throw new Error("Product not found")
     }
 
     if (product.user.toString() !== req.user.id && req.user.isAdmin !== true) {
@@ -84,10 +91,14 @@ const deleteSoftProduct = asyncHandler(async (req, res) => {
 })
 
 const deleteProduct = asyncHandler(async (req, res) => {
+    if (req.user.isAdmin !== true) {
+        res.status(401)
+        throw new Error("Acces deniend")
+    }
     const product = await Product.findById(req.params.id)
     if (!product) {
         res.status(400)
-        throw new Error("The order not found")
+        throw new Error("Product not found")
     }
 
     if (req.user.isAdmin !== true) {
